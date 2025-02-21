@@ -40,3 +40,21 @@ app.get("/", (req, res) => {
         }
       </style>
     </head>
+    <body>
+      <div class="container">
+        <h1>🚀 Hello, World! 🎉</h1>
+        <p>Welcome to the most epic Node.js app ever! <br> Work done by <strong>Benson Mwangi</strong> 😎🔥</p>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
+// Only start the server if this file is run directly (not required by tests)
+if (require.main === module) {
+  app.listen(port, host, () => {
+    console.log(`Running on http://${host}:${port}`);
+  });
+}
+
+module.exports = app;
