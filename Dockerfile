@@ -1,4 +1,4 @@
-ROM node:16-slim
+FROM node:16-slim
 
 # Set working directory
 WORKDIR /usr/src/app
@@ -7,3 +7,4 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install only production dependencies reproducibly
+RUN npm ci --only=production
