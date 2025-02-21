@@ -72,28 +72,6 @@ Open your browser and visit: **http://localhost:3000**
 
 * * *
 
-🛠 Environment Variables
-------------------------
-
-You can configure the app using environment variables:
-
-Variable
-
-Default
-
-Description
-
-`PORT`
-
-`3000`
-
-Port on which the app runs
-
-To run on a different port:
-
-    PORT=4000 npm start
-
-* * *
 
 \`\`\`
 
