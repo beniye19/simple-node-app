@@ -5,35 +5,29 @@ pipeline {
     nodejs 'node16'
   }
   environment {
-    SCANNER_HOME = tool 'beniyesonarscanner'
-    IMAGE_NAME = "beniye/node-hello-world"
-    IMAGE_TAG = "latest"
-    GIT_REPO = "https://github.com/beniye19/node-hello-world.git"
+    SCANNER_HOME   = tool 'beniyesonarscanner'
+    IMAGE_NAME     = "beniye/node-hello-world"
+    IMAGE_TAG      = "latest"
+    GIT_REPO       = "https://github.com/beniye19/node-hello-world.git"
     CONTAINER_NAME = "amazon"
   }
   stages {
-    stage('Load Env Files') {
+    stage('Load DockerHub Env File') {
       steps {
         script {
-          // Load GitHub environment variables from github.env
-          def githubEnv = readProperties file: 'github.env'
-          // Load DockerHub environment variables from dockerhub.env
+          // Load DockerHub environment variables from dockerhub.env (if the file exists)
           def dockerhubEnv = readProperties file: 'dockerhub.env'
-          
-          // Add all variables from github.env to the environment
-          githubEnv.each { key, value ->
-            env[key] = value
-          }
           // Add all variables from dockerhub.env to the environment
           dockerhubEnv.each { key, value ->
             env[key] = value
           }
-          echo "Loaded GitHub and DockerHub environment variables."
+          echo "Loaded DockerHub environment variables."
         }
       }
     }
     stage('Checkout from Git') {
       steps {
+        // Directly use the Git repository URL (public repo, no credentials needed)
         git branch: 'main', url: env.GIT_REPO
       }
     }
@@ -45,7 +39,7 @@ pipeline {
     stage('Unit Tests') {
       steps {
         // Run tests using Mocha with mocha-junit-reporter.
-        // MOCHA_FILE instructs the reporter to write the output to test-results.xml.
+        // MOCHA_FILE instructs the reporter to write results to test-results.xml.
         sh "MOCHA_FILE=./test-results.xml npm test"
         // Archive the test results so they can be viewed in Jenkins.
         junit 'test-results.xml'
@@ -79,7 +73,7 @@ pipeline {
     stage('Docker Build & Push') {
       steps {
         script {
-          // Using Jenkins' withDockerRegistry step.
+          // Using Jenkins' withDockerRegistry step to login and push to DockerHub.
           withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
             sh "docker build -t $IMAGE_NAME:$IMAGE_TAG ."
             sh "docker push $IMAGE_NAME:$IMAGE_TAG"
