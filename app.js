@@ -17,3 +17,7 @@ app.get("/", (req, res) => {
       <style>
         body {
           display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background-color: #282c34;
