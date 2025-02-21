@@ -9,4 +9,6 @@ const host = "0.0.0.0";
 app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
-    <html lang="en"
+    <html lang="en">
+    <head>
+      <met
