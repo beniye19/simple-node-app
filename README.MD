@@ -24,7 +24,7 @@ This repository also explores different ways to **deploy** the application.
 
 3.  **Clone the Repository**  
     
-        git clone https://github.com/your-username/node-hello-world.git
+        git clone https://github.com/beniye19/simple-node-app
     
 
 \`\`\`
