@@ -1,3 +1,8 @@
+  tags = {
+    Name = "Grafana"
+  }
+}
+
 # AWS instance for Prometheus
 resource "aws_instance" "Prometheus" {
   ami                    = data.aws_ami.server_ami.id
@@ -19,3 +24,8 @@ resource "aws_instance" "Node_Exporter" {
     ${file("apache install.sh")}
     ${file("install_jenkins.sh")}
   EOF
+
+  tags = {
+    Name = "Node Exporter"
+  }
+}
