@@ -1,0 +1,95 @@
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk 17'
+        nodejs 'node16'
+    }
+    environment {
+        // Tool installations
+        SCANNER_HOME = tool 'sonar-scanner'
+        // SonarQube variables
+        SONAR_PROJECT_NAME = 'SimpleAPP'
+        SONAR_PROJECT_KEY  = 'SimpleAPP'
+        // Git repository variables
+        GIT_BRANCH = 'master'
+        GIT_REPO   = 'https://github.com/beniye19/simple-node-app.git'
+        // Docker variables
+        DOCKER_IMAGE         = 'hello-world-app'
+        DOCKER_REGISTRY_IMAGE = 'beniye/hello-world-app:latest'
+    }
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git') {
+            steps {
+                git branch: env.GIT_BRANCH, url: env.GIT_REPO
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh """
+                        ${env.SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectName=${env.SONAR_PROJECT_NAME} \
+                        -Dsonar.projectKey=${env.SONAR_PROJECT_KEY}
+                    """
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'jenkins'
+                }
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage('OWASP FS Scan') {
+            steps {
+                script {
+                    try {
+                        timeout(time: 1, unit: 'MINUTES') {
+                            dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                            dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                        }
+                    } catch (err) {
+                        echo "OWASP FS Scan timed out or encountered an error: ${err}. Continuing with pipeline execution."
+                    }
+                }
+            }
+        }
+        stage('Trivy FS Scan') {
+            steps {
+                sh 'trivy fs . > trivyfs.txt'
+            }
+        }
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh "docker build -t ${env.DOCKER_IMAGE} ."
+                        sh "docker tag ${env.DOCKER_IMAGE} ${env.DOCKER_REGISTRY_IMAGE}"
+                        sh "docker push ${env.DOCKER_REGISTRY_IMAGE}"
+                    }
+                }
+            }
+        }
+        stage('Trivy Image Scan') {
+            steps {
+                sh "trivy image ${env.DOCKER_REGISTRY_IMAGE} > trivyimage.txt"
+            }
+        }
+        stage('Deploy to Container') {
+            steps {
+                sh "docker run -d --name ${env.DOCKER_IMAGE} -p 3000:3000 ${env.DOCKER_REGISTRY_IMAGE}"
+            }
+        }
+    }
+}
