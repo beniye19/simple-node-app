@@ -3,6 +3,7 @@
 =================================
 
 Welcome to the **Minimal Node.js Hello World** repository! This is a simple Node.js application that prints **"Hello, World!"** and serves it via an HTTP server.
+![not bad!](/home/benson-ubuntu/Pictures/Screenshots/Screenshot from 2025-02-22 07-07-21.png)
 
 This repository also explores different ways to **deploy** the application.
 
