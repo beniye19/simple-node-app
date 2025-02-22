@@ -31,6 +31,7 @@ This repository also explores different ways to **deploy** the application.
 
 ### 2️⃣ Install Dependencies
 
+    cd simple-node-app
     npm install
 
 \`\`\`
